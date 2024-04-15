@@ -6,7 +6,9 @@ import entity.Customer;
 import entity.User;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -204,5 +206,17 @@ public class DatabaseManager {
     public List<Sale> getListSales() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    public Map<Long, Integer> getPurchaseDataFromDatabase() {
+    Map<Long, Integer> purchaseData = new HashMap<>();
+    // Здесь выполняется запрос к базе данных для получения данных о покупках клиентов
+    // Пример:
+    // ResultSet resultSet = executeQuery("SELECT customer_id, purchase_count FROM purchases");
+    // while (resultSet.next()) {
+    //     purchaseData.put(resultSet.getLong("customer_id"), resultSet.getInt("purchase_count"));
+    // }
+    // Замените этот код на ваш фактический запрос к базе данных
+    return purchaseData;
+}
 
 }

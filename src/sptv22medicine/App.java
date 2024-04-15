@@ -10,6 +10,7 @@ import managers.DatabaseManager;
 import managers.MedicineManager;
 import managers.UserManager;
 import managers.SaleManager;
+import managers.UserManager.CustomerRatingSystem;
 import tools.InputProtection;
 import tools.PassEncrypt;
 
@@ -108,6 +109,8 @@ public class App {
                 case 8:
                     break;
                 case 9:
+                    CustomerRatingSystem ratingSystem = userManager.new CustomerRatingSystem(databaseManager);
+                    ratingSystem.calculateRatings();
                     break;
                 case 10:
                     medicineManager.printSalesRating();

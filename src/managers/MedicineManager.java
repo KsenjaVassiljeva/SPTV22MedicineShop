@@ -122,19 +122,17 @@ public class MedicineManager {
      */
     public void printSalesRating() {
         List<Medicine> medicines = databaseManager.getListMedicines();
-
         if (medicines.isEmpty()) {
             System.out.println("No medicines available.");
             return;
         }
-
-        // Sorting medicines by yearly sales (descending order)
         medicines.sort(Comparator.comparingInt(Medicine::getYearlySales).reversed());
-
         System.out.println("Sales Rating:");
         for (int i = 0; i < medicines.size(); i++) {
             Medicine medicine = medicines.get(i);
-            System.out.printf("%d. %s - Yearly Sales: %d%n", i + 1, medicine.getName(), medicine.getYearlySales());
+            System.out.printf("%d. %s - Yearly Sales: %d, Quantity Sold: %d%n",
+                    i + 1, medicine.getName(), medicine.getYearlySales(), medicine.getQuantity() - medicine.getCount());
         }
     }
+
 }
