@@ -48,12 +48,13 @@ public class MedicineManager {
         System.out.println("----- List Medicines -----");
         List<Medicine> medicines = databaseManager.getListMedicines();
         for (Medicine medicine : medicines) {
-            System.out.printf("%d. %s, Manufacturer: %s, Production Year: %d, In store: %d%n",
+            System.out.printf("%d. %s, Manufacturer: %s, Production Year: %d, In store: %d, Price: %d%n",
                     medicine.getId(),
                     medicine.getName(),
                     medicine.getManufacturer(),
                     medicine.getProductionYear(),
-                    medicine.getCount());
+                    medicine.getCount(), // Changed from getQuantity() to getCount()
+                    medicine.getPrice()); 
         }
         return medicines.size();
     }

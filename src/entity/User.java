@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package entity;
 
 import java.io.Serializable;
@@ -30,6 +25,7 @@ public class User implements Serializable {
     private List<String> roles = new ArrayList<>();
     @OneToOne
     private Customer customer;
+    private double money;
 
     public User() {
     }
@@ -66,12 +62,21 @@ public class User implements Serializable {
         this.roles = roles;
     }
 
+    public double getBalance() {
+        return money;
+    }
+
+    public void setBalance(double balance) {
+        this.money = money;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 23 * hash + Objects.hashCode(this.login);
         hash = 23 * hash + Objects.hashCode(this.password);
         hash = 23 * hash + Objects.hashCode(this.customer);
+        hash = 23 * hash + (int) (Double.doubleToLongBits(this.money) ^ (Double.doubleToLongBits(this.money) >>> 32));
         return hash;
     }
 
@@ -96,6 +101,9 @@ public class User implements Serializable {
         if (!Objects.equals(this.customer, other.customer)) {
             return false;
         }
+        if (Double.doubleToLongBits(this.money) != Double.doubleToLongBits(other.money)) {
+            return false;
+        }
         return true;
     }
 
@@ -106,6 +114,7 @@ public class User implements Serializable {
                 ", password=" + password +
                 ", roles=" + Arrays.toString(roles.toArray()) +
                 ", customer=" + customer.getFirstName() + " " + customer.getLastName() +
+                ", money=" + money +
                 '}';
     }
 
@@ -116,9 +125,10 @@ public class User implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
+    
     public void addMoneyToCustomer(double amount) {
         if (customer != null) {
-            customer.setBalance(customer.getBalance() + amount);
+            customer.setMoney(customer.getMoney() + amount);
         }
     }
 }

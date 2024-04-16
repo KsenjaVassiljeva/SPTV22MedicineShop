@@ -7,6 +7,7 @@ package managers;
 
 import entity.Customer;
 import entity.User;
+import java.io.Console;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,9 @@ public class UserManager {
         customer.setLastName(scanner.nextLine());
         System.out.print("Phone: ");
         customer.setPhone(scanner.nextLine());
+        System.out.print("Initial Money: ");
+        double money = Double.parseDouble(scanner.nextLine());
+        customer.setMoney(money);
         User user = new User();
         System.out.print("Login: ");
         user.setLogin(scanner.nextLine());
@@ -67,7 +71,8 @@ public class UserManager {
                     user.getCustomer().getFirstName(),
                     user.getCustomer().getLastName(),
                     user.getLogin(),
-                    user.getCustomer().getPhone()
+                    user.getCustomer().getPhone(),
+                    user.getBalance()
             );
         }
     }
@@ -134,61 +139,66 @@ public class UserManager {
             System.out.printf("User does not have the role %s%n", role);
         }
     }
-    
+
     public void editUser() {
-        printListUsers();
-        System.out.println("Choose a user to edit: ");
-        int idUser = InputProtection.intInput(1, null);
-        User user = getDatabaseManager().getUser((long) idUser);
+    printListUsers();
+    System.out.println("Choose a user to edit: ");
+    int idUser = InputProtection.intInput(1, null);
+    User user = getDatabaseManager().getUser((long) idUser);
+    
+    if (user != null) {
+        System.out.println("Editing user: " + user.getCustomer().getFirstName() + " " + user.getCustomer().getLastName());
         
-        if (user != null) {
-            System.out.println("Editing user: " + user.getCustomer().getFirstName() + " " + user.getCustomer().getLastName());
-            
-            // Prompt for the fields to edit
-            System.out.println("Select what you want to edit:");
-            System.out.println("1. First Name");
-            System.out.println("2. Last Name");
-            System.out.println("3. Phone");
-            System.out.println("4. Login");
-            System.out.println("5. Password");
-            
-            int choice = InputProtection.intInput(1, 5);
-            
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter new first name: ");
-                    user.getCustomer().setFirstName(scanner.nextLine());
-                    break;
-                case 2:
-                    System.out.print("Enter new last name: ");
-                    user.getCustomer().setLastName(scanner.nextLine());
-                    break;
-                case 3:
-                    System.out.print("Enter new phone: ");
-                    user.getCustomer().setPhone(scanner.nextLine());
-                    break;
-                case 4:
-                    System.out.print("Enter new login: ");
-                    user.setLogin(scanner.nextLine());
-                    break;
-                case 5:
-                    System.out.print("Enter new password: ");
-                    String newPassword = scanner.nextLine().trim();
-                    PassEncrypt pe = new PassEncrypt();
-                    user.setPassword(pe.getEncryptPassword(newPassword, pe.getSalt()));
-                    break;
-                default:
-                    System.out.println("Invalid choice.");
-                    return;
-            }
-            
-            // Save the changes to the database
-            getDatabaseManager().saveUser(user);
-            System.out.println("User details updated successfully.");
-        } else {
-            System.out.println("User not found.");
+        // Prompt for the fields to edit
+        System.out.println("Select what you want to edit:");
+        System.out.println("1. First Name");
+        System.out.println("2. Last Name");
+        System.out.println("3. Phone");
+        System.out.println("4. Login");
+        System.out.println("5. Password");
+        System.out.println("6. Money");
+        
+        int choice = InputProtection.intInput(1, 6);
+        
+        switch (choice) {
+            case 1:
+                System.out.print("Enter new first name: ");
+                user.getCustomer().setFirstName(scanner.nextLine());
+                break;
+            case 2:
+                System.out.print("Enter new last name: ");
+                user.getCustomer().setLastName(scanner.nextLine());
+                break;
+            case 3:
+                System.out.print("Enter new phone: ");
+                user.getCustomer().setPhone(scanner.nextLine());
+                break;
+            case 4:
+                System.out.print("Enter new login: ");
+                user.setLogin(scanner.nextLine());
+                break;
+            case 5:
+                System.out.print("Enter new password: ");
+                String newPassword = scanner.nextLine().trim();
+                PassEncrypt pe = new PassEncrypt();
+                user.setPassword(pe.getEncryptPassword(newPassword, pe.getSalt()));
+                break;
+            case 6:
+                System.out.print("Enter new money: ");
+                user.setBalance(Double.parseDouble(scanner.nextLine()));
+                break;
+            default:
+                System.out.println("Invalid choice.");
+                return;
         }
+        
+        // Save the changes to the database
+        getDatabaseManager().saveUser(user);
+        System.out.println("User details updated successfully.");
+    } else {
+        System.out.println("User not found.");
     }
+}
 
     /**
      * Вложенный класс для системы оценки клиентов.

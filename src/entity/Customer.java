@@ -5,13 +5,7 @@
  */
 package entity;
 
-/**
- *
- * @author admin
- */
-
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,13 +14,14 @@ import javax.persistence.Id;
 
 @Entity
 public class Customer implements Serializable {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
     private String phone;
-    private double balance;
+    private double money; // Changed from balance to money
 
     public Customer() {
     }
@@ -71,14 +66,13 @@ public class Customer implements Serializable {
         this.id = id;
     }
     
-    public double getBalance() {
-        return balance;
+    public double getMoney() {
+        return money;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public void setMoney(double money) { // Changed from setBalance to setMoney
+        this.money = money;
     }
-    
 
     @Override
     public int hashCode() {
@@ -87,6 +81,7 @@ public class Customer implements Serializable {
         hash = 89 * hash + Objects.hashCode(this.lastName);
         hash = 89 * hash + Objects.hashCode(this.email);
         hash = 89 * hash + Objects.hashCode(this.phone);
+        hash = 89 * hash + (int) (Double.doubleToLongBits(this.money) ^ (Double.doubleToLongBits(this.money) >>> 32));
         return hash;
     }
 
@@ -114,6 +109,9 @@ public class Customer implements Serializable {
         if (!Objects.equals(this.phone, other.phone)) {
             return false;
         }
+        if (Double.doubleToLongBits(this.money) != Double.doubleToLongBits(other.money)) {
+            return false;
+        }
         return true;
     }
 
@@ -124,6 +122,7 @@ public class Customer implements Serializable {
                 ", lastName=" + lastName + 
                 ", email=" + email + 
                 ", phone=" + phone +
+                ", money=" + money +
                 '}';
     }
 }

@@ -3,9 +3,11 @@ package sptv22medicine;
 import entity.User;
 import java.util.Scanner;
 import entity.Customer;
-import entity.Medicine;
-import entity.Sale;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import managers.DatabaseManager;
 import managers.MedicineManager;
 import managers.UserManager;
@@ -63,10 +65,9 @@ public class App {
             System.out.println("5. Make a sale");
             System.out.println("6. Редактирование пользователя");
             System.out.println("7. Редактирование лекарства");
-            System.out.println("8. Оборот магазина");
+            System.out.println("8. Функция, отсчитывающая время до скидки");
             System.out.println("9. Рейтинг покупателей по количеству покупок");
             System.out.println("10. Рейтинг продаваемости товаров");
-            System.out.println("11. Функция, отсчитывающая время до компании");
             
             System.out.print("Enter task number: ");
             int task = InputProtection.intInput(0, 11); 
@@ -101,12 +102,23 @@ public class App {
                     saleManager.makeSale(App.user);
                     break;
                 case 6:
-                    userManager.editUser();
+                    if (!App.user.getRoles().contains(App.ROLES.MANAGER.toString())) {
+                        System.out.println("No permission");
+                    } else {
+                        userManager.editUser();
+                        databaseManager.saveUser(userManager.addUser());
+                    }
                     break;
                 case 7:
-                    medicineManager.editMedicine();
+                    if (!App.user.getRoles().contains(App.ROLES.MANAGER.toString())) {
+                        System.out.println("No permission");
+                    } else {
+                        medicineManager.editMedicine();
+                        databaseManager.saveUser(userManager.addUser());
+                    }
                     break;
                 case 8:
+                    showTimeUntilDiscount();
                     break;
                 case 9:
                     CustomerRatingSystem ratingSystem = userManager.new CustomerRatingSystem(databaseManager);
@@ -114,8 +126,6 @@ public class App {
                     break;
                 case 10:
                     medicineManager.printSalesRating();
-                    break;
-                case 11:
                     break;
                 default:
                     System.out.println("Select from list of tasks!");
@@ -164,5 +174,40 @@ public class App {
             }
             System.out.println("Invalid login or password");
         }
+    }
+    private void showTimeUntilDiscount() {
+    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    Date currentDate = new Date();
+    Date discountStartDate = calculateDiscountStartDate();
+    long timeUntilDiscount = discountStartDate.getTime() - currentDate.getTime();
+    
+    if (timeUntilDiscount <= 0) {
+        System.out.println("Скидка уже началась!");
+    } else {
+        long days = timeUntilDiscount / (1000 * 60 * 60 * 24);
+        long hours = (timeUntilDiscount % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
+        long minutes = (timeUntilDiscount % (1000 * 60 * 60)) / (1000 * 60);
+        long seconds = (timeUntilDiscount % (1000 * 60)) / 1000;
+        
+        System.out.println("Время до начала скидки: " + days + " дней, " + hours + " часов, " + minutes + " минут, " + seconds + " секунд");
+    }
+}
+
+    // Метод для расчета времени начала скидки через 2 дня в 11 часов
+    private Date calculateDiscountStartDate() {
+        // Создаем объект Calendar и устанавливаем текущую дату и время
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+
+        // Добавляем 2 дня к текущей дате
+        cal.add(Calendar.DAY_OF_MONTH, 2);
+
+        // Устанавливаем время начала скидки на 11 часов
+        cal.set(Calendar.HOUR_OF_DAY, 11);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+
+        // Возвращаем дату и время начала скидки
+        return cal.getTime();
     }
 }
