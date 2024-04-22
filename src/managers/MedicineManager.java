@@ -20,118 +20,118 @@ public class MedicineManager {
     }
 
     /**
-     * Method to add a medicine to the database.
+     * Метод для добавления лекарства в базу данных.
      */
     public void addMedicine() {
-        System.out.println("----- Add Medicine -----");
+        System.out.println("----- Добавить лекарство -----");
         Medicine medicine = new Medicine();
-        System.out.print("Enter name: ");
+        System.out.print("Введите название: ");
         medicine.setName(scanner.nextLine());
-        System.out.print("Enter manufacturer: ");
+        System.out.print("Введите производителя: ");
         medicine.setManufacturer(scanner.nextLine());
-        System.out.print("Enter production year: ");
+        System.out.print("Введите год производства: ");
         medicine.setProductionYear(InputProtection.intInput(1000, 2030));
-        System.out.print("Enter quantity: ");
+        System.out.print("Введите количество: ");
         medicine.setQuantity(InputProtection.intInput(1, 10));
         medicine.setCount(medicine.getQuantity());
-        System.out.print("Enter price: ");
-        medicine.setPrice(InputProtection.intInput(1, Integer.MAX_VALUE)); // Assuming price cannot be negative
+        System.out.print("Введите цену: ");
+        medicine.setPrice(InputProtection.intInput(1, Integer.MAX_VALUE)); // Предполагается, что цена не может быть отрицательной
         databaseManager.saveMedicine(medicine);
-        System.out.println("Added medicine: " + medicine.toString());
+        System.out.println("Добавлено лекарство: " + medicine.toString());
     }
 
     /**
-     * Method to print the list of medicines.
-     * @return The number of medicines in the list.
+     * Метод для вывода списка лекарств.
+     * @return Количество лекарств в списке.
      */
     public int printListMedicines() {
-        System.out.println("----- List Medicines -----");
+        System.out.println("----- Список лекарств -----");
         List<Medicine> medicines = databaseManager.getListMedicines();
         for (Medicine medicine : medicines) {
-            System.out.printf("%d. %s, Manufacturer: %s, Production Year: %d, In store: %d, Price: %d%n",
+            System.out.printf("%d. %s, Производитель: %s, Год производства: %d, В наличии: %d, Цена: %d%n",
                     medicine.getId(),
                     medicine.getName(),
                     medicine.getManufacturer(),
                     medicine.getProductionYear(),
-                    medicine.getCount(), // Changed from getQuantity() to getCount()
+                    medicine.getCount(), // Изменено с getQuantity() на getCount()
                     medicine.getPrice()); 
         }
         return medicines.size();
     }
 
     /**
-     * Method to edit a medicine in the database.
+     * Метод для редактирования лекарства в базе данных.
      */
     public void editMedicine() {
         int count = printListMedicines();
         if (count == 0) {
-            System.out.println("No medicines available to edit.");
+            System.out.println("Нет доступных лекарств для редактирования.");
             return;
         }
 
-        System.out.print("Choose a medicine to edit: ");
+        System.out.print("Выберите лекарство для редактирования: ");
         int idMedicine = InputProtection.intInput(1, Integer.MAX_VALUE);
         Medicine medicine = databaseManager.getMedicine((long) idMedicine);
 
         if (medicine != null) {
-            System.out.println("Editing medicine: " + medicine.getName());
-            System.out.println("Select what you want to edit:");
-            System.out.println("1. Name");
-            System.out.println("2. Manufacturer");
-            System.out.println("3. Production Year");
-            System.out.println("4. Quantity");
-            System.out.println("5. Price");
+            System.out.println("Редактирование лекарства: " + medicine.getName());
+            System.out.println("Выберите, что вы хотите отредактировать:");
+            System.out.println("1. Название");
+            System.out.println("2. Производитель");
+            System.out.println("3. Год производства");
+            System.out.println("4. Количество");
+            System.out.println("5. Цена");
 
             int choice = InputProtection.intInput(1, 5);
 
             switch (choice) {
                 case 1:
-                    System.out.print("Enter new name: ");
+                    System.out.print("Введите новое название: ");
                     medicine.setName(scanner.nextLine());
                     break;
                 case 2:
-                    System.out.print("Enter new manufacturer: ");
+                    System.out.print("Введите нового производителя: ");
                     medicine.setManufacturer(scanner.nextLine());
                     break;
                 case 3:
-                    System.out.print("Enter new production year: ");
+                    System.out.print("Введите новый год производства: ");
                     medicine.setProductionYear(InputProtection.intInput(1000, 2030));
                     break;
                 case 4:
-                    System.out.print("Enter new quantity: ");
+                    System.out.print("Введите новое количество: ");
                     medicine.setQuantity(InputProtection.intInput(1, 10));
                     medicine.setCount(medicine.getQuantity());
                     break;
                 case 5:
-                    System.out.print("Enter new price: ");
+                    System.out.print("Введите новую цену: ");
                     medicine.setPrice(InputProtection.intInput(1, Integer.MAX_VALUE));
                     break;
                 default:
-                    System.out.println("Invalid choice.");
+                    System.out.println("Недопустимый выбор.");
                     return;
             }
-            // Save the changes to the database
+            // Сохранение изменений в базе данных
             databaseManager.saveMedicine(medicine);
-            System.out.println("Medicine details updated successfully.");
+            System.out.println("Данные о лекарстве успешно обновлены.");
         } else {
-            System.out.println("Medicine not found.");
+            System.out.println("Лекарство не найдено.");
         }
     }
 
     /**
-     * Method to print the sales rating of medicines.
+     * Метод для вывода рейтинга продаж лекарств.
      */
     public void printSalesRating() {
         List<Medicine> medicines = databaseManager.getListMedicines();
         if (medicines.isEmpty()) {
-            System.out.println("No medicines available.");
+            System.out.println("Нет доступных лекарств.");
             return;
         }
         medicines.sort(Comparator.comparingInt(Medicine::getYearlySales).reversed());
-        System.out.println("Sales Rating:");
+        System.out.println("Рейтинг продаж:");
         for (int i = 0; i < medicines.size(); i++) {
             Medicine medicine = medicines.get(i);
-            System.out.printf("%d. %s - Yearly Sales: %d, Quantity Sold: %d%n",
+            System.out.printf("%d. %s - Ежегодные продажи: %d, Количество проданного: %d%n",
                     i + 1, medicine.getName(), medicine.getYearlySales(), medicine.getQuantity() - medicine.getCount());
         }
     }

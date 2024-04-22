@@ -3,16 +3,19 @@ package sptv22medicine;
 import entity.User;
 import java.util.Scanner;
 import entity.Customer;
+import entity.Sale;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import managers.DatabaseManager;
 import managers.MedicineManager;
 import managers.UserManager;
 import managers.SaleManager;
-import managers.UserManager.CustomerRatingSystem;
+
 import tools.InputProtection;
 import tools.PassEncrypt;
 
@@ -41,37 +44,37 @@ public class App {
      */
     public void run() {
         initializeAdmin();
-        System.out.println("If you have a login and password press y, otherwise press n");
+        System.out.println("Если у вас есть логин и пароль нажмите y, если нет то нажмите n");
         String word = scanner.nextLine();
         if ("n".equals(word)) {
             if (App.user == null || !App.user.getRoles().contains(App.ROLES.ADMINISTRATOR.toString())) {
-                System.out.println("Only administrators can add new users.");
+                System.out.println("Только админ может менять и добовлять.");
             } else {
                 databaseManager.saveUser(userManager.addUser());
             }
         }
         loginUser();
         if (App.user == null) return;
-        System.out.printf("Hello %s %s, welcome to the pharmacy%n", App.user.getCustomer().getFirstName(), App.user.getCustomer().getLastName());
+        System.out.printf("Привет %s %s, добро пожаловать в аптеку %n", App.user.getCustomer().getFirstName(), App.user.getCustomer().getLastName());
         boolean repeat = true;
         System.out.println("------- Pharmacy -------");
         do {
             System.out.println("List tasks:");
-            System.out.println("0. Exit");
-            System.out.println("1. Add new medicine");
-            System.out.println("2. Print list medicine");
-            System.out.println("3. Add new user");
-            System.out.println("4. Print list users");
-            System.out.println("5. Make a sale");
+            System.out.println("0. Выход");
+            System.out.println("1. Добавить новое лекарство");
+            System.out.println("2. Список лекарств");
+            System.out.println("3. Добавить нового пользователя");
+            System.out.println("4. Список пользователя");
+            System.out.println("5. Совершить покупку");
             System.out.println("6. Редактирование пользователя");
             System.out.println("7. Редактирование лекарства");
             System.out.println("8. Функция, отсчитывающая время до скидки");
             System.out.println("9. Рейтинг покупателей по количеству покупок");
             System.out.println("10. Рейтинг продаваемости товаров");
             
-            System.out.print("Enter task number: ");
+            System.out.print("Выберите цифру: ");
             int task = InputProtection.intInput(0, 11); 
-            System.out.printf("You selected task %d, to exit press \"0\", to continue press \"1\": ", task);
+            System.out.printf("Вы выбрали функцию %d, выйти \"0\", продолжить \"1\": ", task);
             int toContinue = InputProtection.intInput(0, 1);
             if (toContinue == 0) continue;
             switch (task) {
@@ -80,7 +83,7 @@ public class App {
                     break;
                 case 1:
                     if (!App.user.getRoles().contains(App.ROLES.MANAGER.toString())) {
-                        System.out.println("No permission");
+                        System.out.println("No Нет разрешения");
                         break;
                     }
                     medicineManager.addMedicine();
@@ -90,7 +93,7 @@ public class App {
                     break;
                 case 3:
                     if (!App.user.getRoles().contains(App.ROLES.MANAGER.toString())) {
-                        System.out.println("No permission");
+                        System.out.println("Нет разрешения");
                     } else {
                         databaseManager.saveUser(userManager.addUser());
                     }
@@ -103,36 +106,38 @@ public class App {
                     break;
                 case 6:
                     if (!App.user.getRoles().contains(App.ROLES.MANAGER.toString())) {
-                        System.out.println("No permission");
+                        System.out.println("Нет разрешения");
                     } else {
                         userManager.editUser();
-                        databaseManager.saveUser(userManager.addUser());
+                        // databaseManager.saveUser(userManager.addUser());
+                        databaseManager.saveUser(App.user); // Сохраняем только изменения пользователя
                     }
                     break;
                 case 7:
                     if (!App.user.getRoles().contains(App.ROLES.MANAGER.toString())) {
-                        System.out.println("No permission");
+                        System.out.println("Нет разрешения");
                     } else {
                         medicineManager.editMedicine();
-                        databaseManager.saveUser(userManager.addUser());
+                        // Убираем вызов метода addUser() после редактирования лекарства
+                        // databaseManager.saveUser(userManager.addUser());
+                        databaseManager.saveUser(App.user); // Сохраняем только изменения пользователя
                     }
                     break;
                 case 8:
                     showTimeUntilDiscount();
                     break;
                 case 9:
-                    CustomerRatingSystem ratingSystem = userManager.new CustomerRatingSystem(databaseManager);
-                    ratingSystem.calculateRatings();
+                    saleManager.displayCustomerRankings();
                     break;
                 case 10:
                     medicineManager.printSalesRating();
                     break;
                 default:
-                    System.out.println("Select from list of tasks!");
+                    System.out.println("Выбирайте из списка задач!");
             }
             System.out.println("-----------------------");
         } while (repeat);
-        System.out.println("Goodbye!");
+        System.out.println("Пока-пока!");
     }
     
     /**
@@ -162,9 +167,9 @@ public class App {
      */
     private void loginUser() {
         for (int n = 0; n < 3; n++) {
-            System.out.print("Please enter your login: ");
+            System.out.print("Пожалуйста ведите логин: ");
             String login = scanner.nextLine();
-            System.out.print("Please enter your password: ");
+            System.out.print("Пожалуйста ведите пароль: ");
             String password = scanner.nextLine().trim();
             PassEncrypt pe = new PassEncrypt();
             String encryptPassword = pe.getEncryptPassword(password, pe.getSalt());
@@ -172,15 +177,16 @@ public class App {
             if (App.user != null) {
                 break;
             }
-            System.out.println("Invalid login or password");
+            System.out.println("Неправельный логин или пароль");
         }
     }
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
     private void showTimeUntilDiscount() {
-    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     Date currentDate = new Date();
     Date discountStartDate = calculateDiscountStartDate();
     long timeUntilDiscount = discountStartDate.getTime() - currentDate.getTime();
-    
+
     if (timeUntilDiscount <= 0) {
         System.out.println("Скидка уже началась!");
     } else {
@@ -188,26 +194,26 @@ public class App {
         long hours = (timeUntilDiscount % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
         long minutes = (timeUntilDiscount % (1000 * 60 * 60)) / (1000 * 60);
         long seconds = (timeUntilDiscount % (1000 * 60)) / 1000;
-        
+
         System.out.println("Время до начала скидки: " + days + " дней, " + hours + " часов, " + minutes + " минут, " + seconds + " секунд");
     }
 }
 
-    // Метод для расчета времени начала скидки через 2 дня в 11 часов
-    private Date calculateDiscountStartDate() {
-        // Создаем объект Calendar и устанавливаем текущую дату и время
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
+// Метод для расчета времени начала скидки через 2 дня в 11 часов
+private Date calculateDiscountStartDate() {
+    // Создаем объект Calendar и устанавливаем текущую дату и время
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(new Date());
 
-        // Добавляем 2 дня к текущей дате
-        cal.add(Calendar.DAY_OF_MONTH, 2);
+    // Добавляем 2 дня к текущей дате
+    cal.add(Calendar.DAY_OF_MONTH, 2);
 
-        // Устанавливаем время начала скидки на 11 часов
-        cal.set(Calendar.HOUR_OF_DAY, 11);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
+    // Устанавливаем время начала скидки на 11 часов
+    cal.set(Calendar.HOUR_OF_DAY, 11);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
 
-        // Возвращаем дату и время начала скидки
-        return cal.getTime();
-    }
+    // Возвращаем дату и время начала скидки
+    return cal.getTime();
+}
 }

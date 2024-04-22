@@ -1,10 +1,14 @@
 package managers;
 
+import entity.Customer;
 import entity.Medicine;
 import entity.Sale;
 import entity.User;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -30,13 +34,13 @@ public class SaleManager {
     List<Medicine> medicines = databaseManager.getListMedicines();
 
     // Вывести список доступных продуктов
-    System.out.println("Available Medicines:");
+    System.out.println("Доступные лекарства:");
     for (Medicine medicine : medicines) {
-        System.out.println("ID: " + medicine.getId() + ", Name: " + medicine.getName() + ", Count: " + medicine.getCount());
+        System.out.println("ID: " + medicine.getId() + ", Имя: " + medicine.getName() + ", Count: " + medicine.getCount());
     }
 
     // Запросить у пользователя выбор продукта для покупки
-    System.out.print("Enter the ID of the medicine you want to buy: ");
+    System.out.print("Введите ID лекарства, которое вы хотите купить: ");
     Long medicineId = scanner.nextLong();
     scanner.nextLine(); // Очистить буфер сканера
 
@@ -51,18 +55,18 @@ public class SaleManager {
 
     // Проверить, был ли выбран продукт
     if (selectedMedicine == null) {
-        System.out.println("Invalid medicine ID. Please try again.");
+        System.out.println("Неверный ID лекарства. Пожалуйста, попробуйте еще раз.");
         return;
     }
 
     // Запросить количество продукта для покупки
-    System.out.print("Enter the quantity you want to buy: ");
+    System.out.print("Введите количество, которое вы хотите купить: ");
     int quantity = scanner.nextInt();
     scanner.nextLine(); // Очистить буфер сканера
 
     // Проверить наличие достаточного количества продукта на складе
     if (selectedMedicine.getCount() < quantity) {
-        System.out.println("Insufficient quantity in stock. Please try again.");
+        System.out.println("Недостаточное количество на складе. Пожалуйста, попробуйте еще раз.");
         return;
     }
 
@@ -82,6 +86,34 @@ public class SaleManager {
     databaseManager.saveMedicine(selectedMedicine);
 
     // Вывести подтверждение о покупке
-    System.out.println("Purchase successful. Thank you for shopping with us!");
+    System.out.println("Покупка удачная. Спасибо за покупку!");
+    }
+    
+    public void displayCustomerRankings() {
+        // Получить список всех продаж из базы данных
+        List<Sale> sales = databaseManager.getAllSales();
+
+        // Создать карту для хранения количества покупок каждого покупателя
+        Map<Customer, Integer> customerPurchaseCounts = new HashMap<>();
+
+        // Проанализировать каждую продажу и увеличить количество покупок для соответствующего покупателя
+        for (Sale sale : sales) {
+            Customer customer = sale.getCustomer();
+            int purchaseCount = customerPurchaseCounts.getOrDefault(customer, 0);
+            customerPurchaseCounts.put(customer, purchaseCount + sale.getQuantity());
+        }
+
+        // Преобразовать карту в список для сортировки
+        List<Map.Entry<Customer, Integer>> sortedRankings = new ArrayList<>(customerPurchaseCounts.entrySet());
+        sortedRankings.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())); // Сортировка по убыванию количества покупок
+
+        // Вывести рейтинг покупателей на экран
+        System.out.println("Рейтинг покупателей по количеству покупок:");
+        int rank = 1;
+        for (Map.Entry<Customer, Integer> entry : sortedRankings) {
+            System.out.println(rank + ". " + entry.getKey().getFirstName() + ": " + entry.getValue() + " покупок");
+            rank++;
+        }
     }
 }
+

@@ -217,6 +217,22 @@ public class DatabaseManager {
     // }
     // Замените этот код на ваш фактический запрос к базе данных
     return purchaseData;
+    }
+    
+    // В классе DatabaseManager
+public Map<Customer, Integer> calculatePurchaseCountByCustomer() {
+    Map<Customer, Integer> purchaseCountMap = new HashMap<>();
+    List<Sale> sales = getListSales();
+
+    for (Sale sale : sales) {
+        Customer customer = sale.getCustomer();
+        if (customer != null) {
+            purchaseCountMap.put(customer, purchaseCountMap.getOrDefault(customer, 0) + 1);
+        }
+    }
+
+    return purchaseCountMap;
 }
+
 
 }
